@@ -1,0 +1,19 @@
+<h1>Students List</h1>
+
+<a href="/add">Add New Student</a>
+
+<ul>
+  <% students.forEach(student => { %>
+    <li>
+      <b>Name:</b> <%= student.name %><br>
+      <b>Age:</b> <%= student.age %><br>
+      <b>Email:</b> <%= student.email %>
+
+      <form action="/delete-student" method="POST">
+        <input type="hidden" name="id" value="<%= student._id %>">
+        <button type="submit">Delete</button>
+      </form>
+    </li>
+    <hr>
+  <% }) %>
+</ul>
