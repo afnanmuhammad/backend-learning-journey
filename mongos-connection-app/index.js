@@ -2,7 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import Student from './models/student.model.js';
 
-const port = 3000;
+const port = 5000;
 
 
 const app = express();
@@ -50,6 +50,22 @@ app.get('/students', async (req, res) => {
 
 
 
+//----------------------------Email Template Engine Setup-----------------------------
+app.set("view engine","ejs");
+app.set("views","./view");
+app.use(express.urlencoded({extended:false}));
+
+app.get("/email",(req,res)=>{
+  res.render("email");
+});
+
+
+app.post("/subscribe", (req, res) => {
+  console.log(req.body);
+  res.send("You have been subscribed!");
+});
+
+// localhost:5000
 app.listen(port, () => {
   console.log(" Server is running on port 3000");
 });
