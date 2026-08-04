@@ -1,47 +1,101 @@
 import { body, validationResult } from "express-validator";
 
-export const validateRegister = [
+export const registerValidation = [
   body("email")
     .isEmail()
     .withMessage((value, { req }) => req.t("enterValidEmail")),
+
   body("password")
     .isLength({ min: 6 })
     .withMessage((value, { req }) => req.t("passwordMinLength")),
+
   body("role")
     .optional()
-    .isIn(["user", "admin"])
+    .isIn(["admin", "user"])
     .withMessage((value, { req }) => req.t("invalidRole")),
+
   body("userName")
-    .trim()
     .notEmpty()
-    .isLength({ min: 2, max: 100 })
-    .withMessage((value, { req }) => req.t("userNameLength")),
+    .withMessage((value, { req }) => req.t("userNameRequired")),
+
   body("city")
-    .trim()
     .notEmpty()
-    .isLength({ min: 2, max: 100 })
-    .withMessage((value, { req }) => req.t("city")),
+    .withMessage((value, { req }) => req.t("cityRequired")),
+
   body("postalCode")
-    .trim()
     .notEmpty()
-    .isLength({ min: 5, max: 10 })
-    .withMessage((value, { req }) => req.t("postalCode")),
+    .withMessage((value, { req }) => req.t("postalCodeRequired")),
+
   body("addressLine1")
-    .trim()
     .notEmpty()
-    .isLength({ min: 2, max: 200 })
-    .withMessage((value, { req }) => req.t("addressLine1")),
-  body("addressLine2")
-    .trim()
-    .optional()
-    .isLength({ max: 200 })
-    .withMessage((value, { req }) => req.t("addressLine2Length")),
+    .withMessage((value, { req }) => req.t("addressLine1Required")),
+
+  body("addressLine2").optional(),
+
   body("phoneNumber")
+    .notEmpty()
+    .withMessage((value, { req }) => req.t("phoneNumberRequired"))
+    .matches(/^\+?[0-9]{10,15}$/)
+    .withMessage((value, { req }) => req.t("invalidPhoneNumber")),
+];
+
+export const loginValidation = [
+  body("email")
+    .isEmail()
+    .withMessage((value, { req }) => req.t("enterValidEmail")),
+
+  body("password")
+    .isLength({ min: 6 })
+    .withMessage((value, { req }) => req.t("passwordMinLength")),
+];
+
+export const updateValidation = [
+  body("email")
+    .optional()
+    .isEmail()
+    .withMessage((value, { req }) => req.t("enterValidEmail")),
+
+  body("password")
+    .optional()
+    .isLength({ min: 6 })
+    .withMessage((value, { req }) => req.t("passwordMinLength")),
+
+  body("role")
+    .optional()
+    .isIn(["admin", "user"])
+    .withMessage((value, { req }) => req.t("invalidRole")),
+
+  body("userName")
+    .optional()
     .trim()
     .notEmpty()
-    .matches(/^\+?[1-9]\d{1,15}$/)
-    .isLength({ min: 10, max: 15 })
-    .withMessage((value, { req }) => req.t("phoneNumber")),
+    .withMessage((value, { req }) => req.t("userNameRequired")),
+
+  body("city")
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage((value, { req }) => req.t("cityRequired")),
+
+  body("postalCode")
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage((value, { req }) => req.t("postalCodeRequired")),
+
+  body("addressLine1")
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage((value, { req }) => req.t("addressLine1Required")),
+
+  body("addressLine2").optional(),
+
+  body("phoneNumber")
+    .optional()
+    .trim()
+    .matches(/^\+?[0-9]{10,15}$/)
+    .withMessage((value, { req }) => req.t("invalidPhoneNumber")),
 ];
 
 export const handleValidationErrors = (req, res, next) => {
@@ -51,64 +105,3 @@ export const handleValidationErrors = (req, res, next) => {
   }
   next();
 };
-
-export const validateLogin = [
-  body("email")
-    .isEmail()
-    .withMessage((value, { req }) => req.t("enterValidEmail")),
-
-  body("password")
-    .isLength({ min: 6 })
-    .withMessage((value, { req }) => req.t("passwordMinLength")),
-];
-
-export const updateValidate = [
-  body("email")
-    .optional()
-    .isEmail()
-    .withMessage((value, { req }) => req.t("enterValidEmail")),
-  body("password")
-    .optional()
-    .isLength({ min: 6 })
-    .withMessage((value, { req }) => req.t("passwordMinLength")),
-  body("role")
-    .optional()
-    .isIn(["user", "admin"])
-    .withMessage((value, { req }) => req.t("invalidRole")),
-  body("userName")
-    .trim()
-    .optional()
-    .notEmpty()
-    .isLength({ min: 2, max: 100 })
-    .withMessage((value, { req }) => req.t("userNameLength")),
-  body("city")
-    .trim()
-    .optional()
-    .notEmpty()
-    .isLength({ min: 2, max: 100 })
-    .withMessage((value, { req }) => req.t("city")),
-  body("postalCode")
-    .trim()
-    .optional()
-    .notEmpty()
-    .isLength({ min: 5, max: 10 })
-    .withMessage((value, { req }) => req.t("postalCode")),
-  body("addressLine1")
-    .trim()
-    .optional()
-    .notEmpty()
-    .isLength({ min: 2, max: 200 })
-    .withMessage((value, { req }) => req.t("addressLine1")),
-  body("addressLine2")
-    .trim()
-    .optional()
-    .isLength({ max: 200 })
-    .withMessage((value, { req }) => req.t("addressLine2Length")),
-  body("phoneNumber")
-    .trim()
-    .optional()
-    .notEmpty()
-    .matches(/^\+?[1-9]\d{1,15}$/)
-    .isLength({ min: 10, max: 15 })
-    .withMessage((value, { req }) => req.t("phoneNumber")),
-];

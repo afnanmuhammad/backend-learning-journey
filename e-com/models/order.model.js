@@ -1,99 +1,71 @@
 import mongoose from "mongoose";
-import {baseSchemaPlugin } from "../plugins/baseSchema.plugin.js"
+import { addCommonVirtuals } from "../helpers/mongoose-plugin.js";
+import { orderStatuses } from "../constants/order.constants.js";
 
-const orderItemSchema = new mongoose.Schema(
-  {
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
-      required: [true, "Product is required"],
-    },
-
-    quantity: {
-      type: Number,
-      required: [true, "Quantity is required"],
-      min: [1, "Quantity must be at least 1"],
-      max: [100, "Quantity cannot be more than 100"],
-    },
-
-    price: {
-      type: Number,
-      required: [true, "Price is required"],
-      min: [0, "Price cannot be less than 0"],
-      max: [1000000, "Price cannot be more than 1,000,000"],
-    },
+const orderItemSchema = mongoose.Schema({
+  product: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+    required: true,
   },
-  { _id: false },
-);
 
-const orderSchema = new mongoose.Schema(
+  quantity: {
+    type: Number,
+    required: [true, "Quantity is required"],
+    min: [1, "Quantity must be at least 1"],
+    max: [999, "Quantity cannot exceed 999"],
+  },
+
+  price: {
+    type: Number,
+    required: [true, "Price is required"],
+  },
+});
+
+const orderSchema = mongoose.Schema(
   {
-    orderItems: {
-      type: [orderItemSchema],
-      required: [true, "Order items are required"],
-      validate: {
-        validator: function (items) {
-          return items.length > 0;
-        },
-        message: "Order must contain at least one item",
-      },
-    },
-
+    orderItems: [orderItemSchema],
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "User is required"],
+      required: true,
     },
-
     status: {
       type: String,
       enum: {
-        values: [
-          "pending",
-          "confirmed",
-          "processing",
-          "shipped",
-          "delivered",
-          "cancelled",
-        ],
-        message: "Invalid order status",
+        values: orderStatuses,
+        message:
+          'Status must be one of: "pending", "processing", "shipped", "delivered", "cancelled"',
       },
       default: "pending",
     },
-
     totalPrice: {
       type: Number,
-      required: [true, "Total price is required"],
-      min: [0, "Total price cannot be less than 0"],
-      max: [10000000, "Total price cannot be more than 10,000,000"],
+      required: [true, "Total price is required."],
     },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
+// return id property. better than _id
+orderSchema.plugin(addCommonVirtuals);
 
-orderSchema.plugin(baseSchemaPlugin);
-
-// Calculate total price
+// Calculate total price for order items
 orderSchema.methods.calculateTotalPrice = function () {
-  return this.orderItems.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0,
-  );
+  return this.orderItems.reduce((total, item) => {
+    return total + item.price * item.quantity;
+  }, 0);
 };
 
-// Before saving order
+// Pre-save middleware: runs automatically before saving an order document.
 orderSchema.pre("save", function (next) {
-  if (this.isModified("orderItems")) {
+  if (this.isModified("orderItems") || !this.totalPrice) {
     this.totalPrice = this.calculateTotalPrice();
   }
 
   next();
 });
 
-// Create Order model
-const orderModel = mongoose.model("Order", orderSchema);
-
-export { orderModel };
+export const OrderModel = mongoose.model("Order", orderSchema);

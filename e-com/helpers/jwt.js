@@ -11,9 +11,12 @@ export const generateToken = (user) => {
       role: user.role,
       userName: user.userName,
       phoneNumber: user.phoneNumber,
-    
     },
-    process.env.SECRET_KEY,
-   { expiresIn: process.env.JWT_EXPIRES_IN }
+
+    process.env.SECRET,
+
+    {
+      expiresIn: "7d",
+    },
   );
 };
